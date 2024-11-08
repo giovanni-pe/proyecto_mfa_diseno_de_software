@@ -1,0 +1,61 @@
+@startuml
+actor User
+
+rectangle "API Gateway" as APIGateway #lightgreen
+rectangle "Event Bus" as EventBus #lightyellow
+
+package "Microservices" {
+    rectangle "Conferencias\n(DB incluida)" as Conferencias <<MS>> #lightblue
+    rectangle "Inscripciones\n(DB incluida)" as Inscripciones <<MS>> #lightblue
+    rectangle "Ponencias\n(DB incluida)" as Ponencias <<MS>> #lightblue
+    rectangle "Cronograma\n(DB incluida)" as Cronograma <<MS>> #lightblue
+    rectangle "Talleres\n(DB incluida)" as Talleres <<MS>> #lightblue
+    rectangle "Pagos\n(DB incluida)" as Pagos <<MS>> #lightblue
+    rectangle "Personas\n(DB incluida)" as Personas <<MS>> #lightblue
+}
+
+package "Microfrontends" {
+    rectangle "Angular (Conferencias)" as AngularConferencias #lightgreen
+    rectangle "React (Inscripciones & Pagos)" as ReactInscripcionesPagos #lightgreen
+    rectangle "Svelte (Cronograma)" as SvelteCronograma #lightgreen
+    rectangle "Vue (Personas & Talleres)" as VuePersonasTalleres #lightgreen
+}
+
+' Define user interactions with microfrontends
+User --> AngularConferencias : Uses
+User --> ReactInscripcionesPagos : Uses
+User --> SvelteCronograma : Uses
+User --> VuePersonasTalleres : Uses
+
+' Define connections between microfrontends and API Gateway
+AngularConferencias --> APIGateway : REST API
+ReactInscripcionesPagos --> APIGateway : REST API
+SvelteCronograma --> APIGateway : REST API
+VuePersonasTalleres --> APIGateway : REST API
+
+' Define API Gateway communication with microservices
+APIGateway --> Conferencias : REST API
+APIGateway --> Inscripciones : REST API
+APIGateway --> Ponencias : REST API
+APIGateway --> Cronograma : REST API
+APIGateway --> Talleres : REST API
+APIGateway --> Pagos : REST API
+APIGateway --> Personas : REST API
+
+' Define Event-Driven Architecture (EDA) connections
+Conferencias -down-> EventBus : Publish Events
+Inscripciones -down-> EventBus : Publish Events
+Ponencias -down-> EventBus : Publish Events
+Cronograma -down-> EventBus : Publish Events
+Talleres -down-> EventBus : Publish Events
+Pagos -down-> EventBus : Publish Events
+Personas -down-> EventBus : Publish Events
+
+EventBus -right-> Conferencias : Event Subscription
+EventBus -right-> Inscripciones : Event Subscription
+EventBus -left-> Ponencias : Event Subscription
+EventBus -left-> Cronograma : Event Subscription
+EventBus -down-> Talleres : Event Subscription
+EventBus -down-> Pagos : Event Subscription
+EventBus -down-> Personas : Event Subscription
+@enduml
