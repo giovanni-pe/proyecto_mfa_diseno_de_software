@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <style>
+        button {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gestión de Usuarios</h1>
+
+    <!-- Formulario de Búsqueda -->
+    <h2>Buscar Usuario por ID</h2>
+    <form id="searchForm">
+        <label for="userId">ID:</label>
+        <input type="text" id="userId" name="userId"><br><br>
+        <button type="submit">Buscar</button>
+    </form>
+
+    <!-- Resultado de la Búsqueda -->
+    <h2>Resultado de la Búsqueda:</h2>
+    <ul id="searchResult"></ul>
+
+    <!-- Lista de Todos los Usuarios -->
+    <h2>Todos los Usuarios</h2>
+    <ul id="userList"></ul>
+
+    <!-- Formulario para Crear Usuario -->
+    <h2>Crear Usuario</h2>
+    <form id="createUserForm">
+        <label for="createName">Nombre:</label>
+        <input type="text" id="createName" name="createName"><br><br>
+
+        <label for="createAge">Edad:</label>
+        <input type="number" id="createAge" name="createAge"><br><br>
+
+        <label for="createEmail">Correo Electrónico:</label>
+        <input type="email" id="createEmail" name="createEmail"><br><br>
+
+        <button type="submit">Crear Usuario</button>
+    </form>
+
+    <!-- Formulario para Actualizar Usuario -->
+    <h2>Actualizar Usuario</h2>
+    <form id="updateUserForm">
+        <input type="hidden" id="updateUserId" name="updateUserId">
+
+        <label for="updateName">Nuevo Nombre:</label>
+        <input type="text" id="updateName" name="updateName"><br><br>
+
+        <label for="updateAge">Nueva Edad:</label>
+        <input type="number" id="updateAge" name="updateAge"><br><br>
+
+        <label for="updateEmail">Nuevo Correo Electrónico:</label>
+        <input type="email" id="updateEmail" name="updateEmail"><br><br>
+
+        <button type="submit">Actualizar Usuario</button>
+    </form>
+
+    <!-- Formulario para Eliminar Usuario -->
+    <h2>Eliminar Usuario</h2>
+    <form id="deleteUserForm">
+        <label for="deleteUserId">ID del Usuario:</label>
+        <input type="text" id="deleteUserId" name="deleteUserId"><br><br>
+        <button type="submit">Eliminar Usuario</button>
+    </form>
+
+    <script>
+        // Cargar todos los usuarios al cargar la página
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userList = document.getElementById('userList');
+            const updateUserId = document.getElementById('updateUserId');
+            const deleteUserId = document.getElementById('deleteUserId');
+            try {
+                const response = await fetch('/api/users');
+                const users = await response.json();
+
+                users.forEach(user => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${user.name} - ${user.age} años - ${user.email}`;
+                    listItem.addEventListener('click', () => {
+                        updateUserId.value = user._id;
+                        document.getElementById('updateName').value = user.name;
+                        document.getElementById('updateAge').value = user.age;
+                        document.getElementById('updateEmail').value = user.email;
+
+                        deleteUserId.value = user._id;  // Cargar ID para eliminar
+                    });
+                    userList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error("Error al cargar usuarios:", error);
+            }
+        });
+
+        // Manejar la búsqueda de usuarios por ID
+        document.getElementById('searchForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const userId = document.getElementById('userId').value;
+            const searchResult = document.getElementById('searchResult');
+            searchResult.innerHTML = '';  // Limpiar resultados anteriores
+
+            try {
+                const response = await fetch(`/api/users/${userId}`);
+                if (response.status === 404) {
+                    searchResult.textContent = 'Usuario no encontrado.';
+                    return;
+                }
+                const user = await response.json();
+
+                const listItem = document.createElement('li');
+                listItem.textContent = `${user.name} - ${user.age} años - ${user.email}`;
+                searchResult.appendChild(listItem);
+            } catch (error) {
+                console.error("Error al buscar usuario:", error);
+                searchResult.textContent = 'Error al buscar usuario';
+            }
+        });
+
+        // Manejar la creación de usuarios
+        document.getElementById('createUserForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const name = document.getElementById('createName').value;
+            const age = document.getElementById('createAge').value;
+            const email = document.getElementById('createEmail').value;
+
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, age, email })
+                });
+                const newUser = await response.json();
+                alert('Usuario creado: ' + newUser.name);
+            } catch (error) {
+                console.error('Error al crear usuario:', error);
+            }
+        });
+
+        // Manejar la actualización de usuarios
+        document.getElementById('updateUserForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const userId = document.getElementById('updateUserId').value;
+            const name = document.getElementById('updateName').value;
+            const age = document.getElementById('updateAge').value;
+            const email = document.getElementById('updateEmail').value;
+
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, age, email })
+                });
+                const updatedUser = await response.json();
+                alert('Usuario actualizado: ' + updatedUser.name);
+            } catch (error) {
+                console.error('Error al actualizar usuario:', error);
+            }
+        });
+
+        // Manejar la eliminación de usuarios
+        document.getElementById('deleteUserForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const userId = document.getElementById('deleteUserId').value;
+
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                alert('Usuario eliminado');
+            } catch (error) {
+                console.error('Error al eliminar usuario:', error);
+            }
+        });
+    </script>
+</body>
+</html>
