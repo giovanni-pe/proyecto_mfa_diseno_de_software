@@ -1,0 +1,77 @@
+@startuml
+
+entity conferencias {
+    +id : PK
+    title : string
+    description : string
+    status : enum('Active', 'Inactive')
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity inscripciones {
+    +id : PK
+    conference_id : FK
+    person_id : FK
+    status : enum('Active', 'Cancelled')
+    registration_date : datetime
+    updated_at : datetime
+}
+
+entity ponencias {
+    +id : PK
+    conference_id : FK
+    title : string
+    presenter : string
+    status : enum('Active', 'Inactive')
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity cronograma {
+    +id : PK
+    conference_id : FK
+    session_title : string
+    start_time : datetime
+    end_time : datetime
+    location : string
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity talleres {
+    +id : PK
+    conference_id : FK
+    title : string
+    status : enum('Active', 'Inactive')
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity pagos {
+    +id : PK
+    person_id : FK
+    amount : decimal
+    status : enum('Paid', 'Cancelled')
+    payment_date : datetime
+    updated_at : datetime
+}
+
+entity personas {
+    +id : PK
+    name : string
+    email : string
+    phone : string
+    registration_date : datetime
+    updated_at : datetime
+}
+
+' Relaciones entre las entidades
+conferencias ||--o{ ponencias : "tiene"
+conferencias ||--o{ talleres : "tiene"
+conferencias ||--o{ inscripciones : "registra"
+conferencias ||--o{ cronograma : "define"
+personas ||--o{ inscripciones : "se inscribe"
+personas ||--o{ pagos : "realiza"
+
+@enduml
