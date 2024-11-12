@@ -22,7 +22,7 @@ entity ponencias {
     +id : PK
     conference_id : FK
     title : string
-    presenter : string
+    presenter : id_persona
     status : enum('Active', 'Inactive')
     created_at : datetime
     updated_at : datetime
@@ -75,3 +75,175 @@ personas ||--o{ inscripciones : "se inscribe"
 personas ||--o{ pagos : "realiza"
 
 @enduml
+
+' Version 2
+
+@startuml
+
+entity conferencias {
+    +id : PK
+    title : string
+    description : string
+    status : enum('Active', 'Inactive')
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity inscripciones {
+    +id : PK
+    conference_id : FK
+    person_id : FK
+    status : enum('Active', 'Cancelled')
+    registration_date : datetime
+    updated_at : datetime
+}
+
+entity ponencias {
+    +id : PK
+    conference_id : FK
+    title : string
+    presenter : string
+    status : enum('Active', 'Inactive')
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity cronograma {
+    +id : PK
+    conference_id : FK
+    session_title : string
+    start_time : datetime
+    end_time : datetime
+    location : string
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity talleres {
+    +id : PK
+    conference_id : FK
+    title : string
+    status : enum('Active', 'Inactive')
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity pagos {
+    +id : PK
+    person_id : FK
+    amount : decimal
+    status : enum('Paid', 'Cancelled')
+    payment_date : datetime
+    updated_at : datetime
+}
+
+entity personas {
+    +id : PK
+    dni : string
+    firstName : string
+    lastName : string
+    email : string
+    phoneNumber : string
+    birthDate : datetime
+    registration_date : datetime
+    updated_at : datetime
+}
+
+' Relaciones entre los microservicios
+conferencias ||--o{ inscripciones : "registra"
+conferencias ||--o{ ponencias : "contiene"
+conferencias ||--o{ cronograma : "define"
+conferencias ||--o{ talleres : "incluye"
+personas ||--o{ inscripciones : "se inscribe en"
+personas ||--o{ pagos : "realiza"
+inscripciones ||--|| pagos : "verifica"
+@enduml
+
+' Version 3
+
+@startuml
+
+entity conferencias {
+    +id : PK
+    title : string
+    description : string
+    status : enum('Active', 'Inactive')
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity inscripciones {
+    +id : PK
+    conference_id : FK
+    person_id : FK
+    status : enum('Active', 'Cancelled')
+    registration_date : datetime
+    updated_at : datetime
+}
+
+entity ponencias {
+    +id : PK
+    conference_id : FK
+    title : string
+    presenter : persona_id
+    status : enum('Active', 'Inactive')
+    duration : integer (en minutos)
+    start_time : datetime
+    end_time : datetime
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity cronograma {
+    +id : PK
+    conference_id : FK
+    date : datetime
+    activities : json
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity talleres {
+    +id : PK
+    conference_id : FK
+    title : string
+    status : enum('Active', 'Inactive')
+    duration : integer (en minutos)
+    start_time : datetime
+    end_time : datetime
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity pagos {
+    +id : PK
+    person_id : FK
+    amount : decimal
+    status : enum('Paid', 'Cancelled')
+    payment_date : datetime
+    updated_at : datetime
+}
+
+entity personas {
+    +id : PK
+    dni : string
+    firstName : string
+    lastName : string
+    email : string
+    phoneNumber : string
+    birthDate : datetime
+    registration_date : datetime
+    updated_at : datetime
+}
+
+' Relaciones entre las entidades
+conferencias ||--o{ inscripciones : "registra"
+conferencias ||--o{ cronograma : "define"
+personas ||--o{ inscripciones : "se inscribe en"
+personas ||--o{ pagos : "realiza"
+inscripciones ||--|| pagos : "verifica"
+cronograma ||--o{ ponencias : "incluye"
+cronograma ||--o{ talleres : "incluye"
+
+@enduml
+
